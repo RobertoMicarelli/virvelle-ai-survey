@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey AI Toolkit - Virvelle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066FF;
+            --primary-dark: #0052CC;
+            --secondary: #00D4AA;
+            --dark: #1A1A2E;
+            --gray: #6B7280;
+            --light-gray: #F3F4F6;
+            --white: #FFFFFF;
+            --error: #EF4444;
+            --success: #10B981;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .header h1 {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-container {
+            padding: 1.5rem 2rem;
+            background: var(--light-gray);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: var(--secondary);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            color: var(--gray);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .question {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .question:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateX(4px);
+        }
+
+        .question-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: block;
+            font-size: 1rem;
+        }
+
+        .question-number {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+        }
+
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--white);
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            border-color: var(--primary);
+            background: rgba(0, 102, 255, 0.05);
+        }
+
+        .radio-option input[type="radio"],
+        .checkbox-option input[type="checkbox"] {
+            margin-right: 0.75rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .radio-option label,
+        .checkbox-option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .radio-option input[type="radio"]:checked + label,
+        .checkbox-option input[type="checkbox"]:checked + label {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus,
+        input[type="text"]:focus,
+        input[type="email"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--gray);
+        }
+
+        .btn-secondary:hover {
+            background: #E5E7EB;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon::after {
+            content: '✓';
+            color: var(--white);
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .required {
+            color: var(--error);
+            margin-left: 0.25rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .content {
+                padding: 1.5rem 1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI TOOLKIT SURVEY</h1>
+            <p>Valutazione iniziale per Virvelle</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">
+                <span id="progressText">Sezione 1 di 6</span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- SEZIONE 1: PROFILO -->
+            <div class="section active" id="section1">
+                <h2 class="section-title">📋 Profilo e Contesto</h2>
+                <p class="section-subtitle">Informazioni preliminari sul tuo ruolo</p>
+
+                <div class="question">
+                    <label class="question-label">
+                        Nome <span class="required">*</span>
+                    </label>
+                    <input type="text" name="nome" id="nome" placeholder="Il tuo nome" required style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 8px; font-family: 'Work Sans', sans-serif; font-size: 0.95rem; transition: all 0.3s ease;">
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        Cognome <span class="required">*</span>
+                    </label>
+                    <input type="text" name="cognome" id="cognome" placeholder="Il tuo cognome" required style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 8px; font-family: 'Work Sans', sans-serif; font-size: 0.95rem; transition: all 0.3s ease;">
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        Email <span class="required">*</span>
+                    </label>
+                    <input type="email" name="email" id="email" placeholder="la.tua.email@virvelle.com" required style="width: 100%; padding: 0.75rem; border: 2px solid #E5E7EB; border-radius: 8px; font-family: 'Work Sans', sans-serif; font-size: 0.95rem; transition: all 0.3s ease;">
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q1</span>
+                        Qual è il tuo ruolo principale in Virvelle? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q1_1" name="q1" value="Commerciale/Business Development" required>
+                            <label for="q1_1">Commerciale/Business Development</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q1_2" name="q1" value="Tutor d'aula">
+                            <label for="q1_2">Tutor d'aula</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q1_3" name="q1" value="Designer formativo/Progettista">
+                            <label for="q1_3">Designer formativo/Progettista</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q1_4" name="q1" value="Management">
+                            <label for="q1_4">Management</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q1_5" name="q1" value="Amministrativo/Compliance">
+                            <label for="q1_5">Amministrativo/Compliance</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q1_6" name="q1" value="Operativo">
+                            <label for="q1_6">Operativo (eventi, rendicontazione, coordinamento)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q1_7" name="q1" value="Altro">
+                            <label for="q1_7">Altro</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q2</span>
+                        Con che frequenza utilizzi strumenti di Intelligenza Artificiale nel tuo lavoro? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q2_1" name="q2" value="Quotidianamente" required>
+                            <label for="q2_1">Quotidianamente (più volte al giorno)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q2_2" name="q2" value="Regolarmente">
+                            <label for="q2_2">Regolarmente (almeno 2-3 volte a settimana)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q2_3" name="q2" value="Occasionalmente">
+                            <label for="q2_3">Occasionalmente (una volta a settimana o meno)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q2_4" name="q2" value="Raramente">
+                            <label for="q2_4">Raramente (solo per curiosità)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q2_5" name="q2" value="Mai">
+                            <label for="q2_5">Mai o quasi mai</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q3</span>
+                        Quali strumenti AI hai già utilizzato? <span class="required">*</span>
+                    </label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_1" name="q3" value="ChatGPT free">
+                            <label for="q3_1">ChatGPT (versione free)</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_2" name="q3" value="ChatGPT Plus/Team/Enterprise">
+                            <label for="q3_2">ChatGPT Plus/Team/Enterprise</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_3" name="q3" value="Claude">
+                            <label for="q3_3">Claude (Anthropic)</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_4" name="q3" value="Gemini">
+                            <label for="q3_4">Gemini (Google)</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_5" name="q3" value="Perplexity">
+                            <label for="q3_5">Perplexity</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_6" name="q3" value="NotebookLM">
+                            <label for="q3_6">NotebookLM</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_7" name="q3" value="Microsoft Copilot">
+                            <label for="q3_7">Microsoft Copilot</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="q3_8" name="q3" value="Nessuno">
+                            <label for="q3_8">Nessuno</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q4</span>
+                        Qual è il tuo principale obiettivo per questa formazione? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q4_1" name="q4" value="Capire le basi" required>
+                            <label for="q4_1">Capire le basi e iniziare ad usare l'AI</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q4_2" name="q4" value="Migliorare efficienza">
+                            <label for="q4_2">Migliorare l'efficienza nelle attività quotidiane</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q4_3" name="q4" value="Tecniche avanzate">
+                            <label for="q4_3">Imparare tecniche avanzate di prompting</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q4_4" name="q4" value="Automatizzare processi">
+                            <label for="q4_4">Automatizzare processi ripetitivi</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q4_5" name="q4" value="Esplorare strumenti">
+                            <label for="q4_5">Esplorare strumenti nuovi</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q4_6" name="q4" value="Tutto">
+                            <label for="q4_6">Tutto quanto sopra</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 2: CONOSCENZE TECNICHE -->
+            <div class="section" id="section2">
+                <h2 class="section-title">🔬 Conoscenze Tecniche Base</h2>
+                <p class="section-subtitle">Valutiamo la tua comprensione dei concetti fondamentali</p>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q5</span>
+                        Cosa significa "token" nel contesto dei Large Language Models? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q5_1" name="q5" value="Password" required>
+                            <label for="q5_1">È la password per accedere al sistema</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q5_2" name="q5" value="Unità base">
+                            <label for="q5_2">È l'unità base con cui l'AI elabora il testo (circa 4 caratteri)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q5_3" name="q5" value="Credito">
+                            <label for="q5_3">È il credito che si consuma ad ogni utilizzo</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q5_4" name="q5" value="Non so">
+                            <label for="q5_4">Non lo so</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q6</span>
+                        Cos'è il "context window" di un modello AI? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q6_1" name="q6" value="Finestra browser" required>
+                            <label for="q6_1">La finestra del browser in cui scrivo</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q6_2" name="q6" value="Memoria">
+                            <label for="q6_2">La quantità di testo/informazioni che il modello può "ricordare"</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q6_3" name="q6" value="Tempo sessione">
+                            <label for="q6_3">Il tempo massimo di una sessione</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q6_4" name="q6" value="Non so">
+                            <label for="q6_4">Non lo so</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q7</span>
+                        Quale di queste affermazioni è CORRETTA? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q7_1" name="q7" value="Internet tempo reale" required>
+                            <label for="q7_1">ChatGPT ha accesso a internet in tempo reale e sa cosa è successo oggi</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q7_2" name="q7" value="Capisce davvero">
+                            <label for="q7_2">L'AI "capisce" davvero quello che scrivo come farebbe un umano</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q7_3" name="q7" value="Probabilistiche">
+                            <label for="q7_3">Le risposte dell'AI sono probabilistiche, non deterministiche</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q7_4" name="q7" value="Impara conversazioni">
+                            <label for="q7_4">Una volta addestrata, l'AI impara dalle mie conversazioni</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q7_5" name="q7" value="Non so">
+                            <label for="q7_5">Non so rispondere</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q8</span>
+                        Perché l'AI a volte "inventa" informazioni (allucinazioni)? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q8_1" name="q8" value="Programmata per mentire" required>
+                            <label for="q8_1">È programmata per mentire</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q8_2" name="q8" value="Predice sequenza">
+                            <label for="q8_2">Predice la sequenza di parole più probabile, anche senza dati reali</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q8_3" name="q8" value="Bug">
+                            <label for="q8_3">Ha un bug nel sistema</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q8_4" name="q8" value="Uso sbagliato">
+                            <label for="q8_4">Succede solo se si usa male</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q8_5" name="q8" value="Non so">
+                            <label for="q8_5">Non lo so</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 3: PROMPTING -->
+            <div class="section" id="section3">
+                <h2 class="section-title">✍️ Prompting e Pratica</h2>
+                <p class="section-subtitle">Come interagisci attualmente con l'AI</p>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q9</span>
+                        Come descriveresti la qualità dei tuoi prompt attuali? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q9_1" name="q9" value="Molto semplici" required>
+                            <label for="q9_1">Scrivo richieste molto semplici e generiche</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q9_2" name="q9" value="Qualche dettaglio">
+                            <label for="q9_2">Fornisco qualche dettaglio ma non sono sicuro/a</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q9_3" name="q9" value="Strutturati">
+                            <label for="q9_3">Strutturato i prompt con contesto, ruolo e esempi</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q9_4" name="q9" value="Avanzati">
+                            <label for="q9_4">Uso tecniche avanzate (few-shot, chain-of-thought)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q9_5" name="q9" value="Mai scritto">
+                            <label for="q9_5">Non ho mai scritto un prompt</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q10</span>
+                        Quale di questi prompt è più efficace per ottenere una email commerciale di qualità? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q10_1" name="q10" value="A" required>
+                            <label for="q10_1"><strong>A)</strong> "Scrivi una email per un cliente"</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q10_2" name="q10" value="B">
+                            <label for="q10_2"><strong>B)</strong> "Scrivi una email professionale per proporre un corso"</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q10_3" name="q10" value="C">
+                            <label for="q10_3"><strong>C)</strong> Prompt dettagliato con ruolo, contesto, vincoli ed esempi</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q10_4" name="q10" value="D">
+                            <label for="q10_4"><strong>D)</strong> "Crea email vendita corso"</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q10_5" name="q10" value="Tutti uguali">
+                            <label for="q10_5">Sono tutti uguali</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q11</span>
+                        Cos'è il "few-shot learning" nel prompting? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q11_1" name="q11" value="Poche domande" required>
+                            <label for="q11_1">Fare poche domande all'AI</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q11_2" name="q11" value="Esempi">
+                            <label for="q11_2">Fornire 2-3 esempi di input-output per guidare l'AI</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q11_3" name="q11" value="Pochi minuti">
+                            <label for="q11_3">Usare l'AI per pochi minuti al giorno</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q11_4" name="q11" value="Non so">
+                            <label for="q11_4">Non lo so</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q12</span>
+                        Cos'è il "chain-of-thought prompting"? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q12_1" name="q12" value="Concatenare prompt" required>
+                            <label for="q12_1">Concatenare più prompt in sequenza</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q12_2" name="q12" value="Ragionamento">
+                            <label for="q12_2">Chiedere all'AI di mostrare il ragionamento passo-passo</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q12_3" name="q12" value="Pensare prima">
+                            <label for="q12_3">Pensare prima di scrivere il prompt</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q12_4" name="q12" value="Non so">
+                            <label for="q12_4">Non lo so</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q13</span>
+                        Hai mai iterato un prompt (modificato progressivamente) per migliorare la risposta? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q13_1" name="q13" value="Sì regolarmente" required>
+                            <label for="q13_1">Sì, regolarmente - so come raffinare strategicamente</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q13_2" name="q13" value="Sì qualche volta">
+                            <label for="q13_2">Sì, qualche volta - ci provo ma non ho un metodo</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q13_3" name="q13" value="Raramente">
+                            <label for="q13_3">Raramente - di solito uso la prima risposta</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q13_4" name="q13" value="No">
+                            <label for="q13_4">No, non sapevo si potesse/dovesse fare</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 4: STRUMENTI -->
+            <div class="section" id="section4">
+                <h2 class="section-title">🛠️ Strumenti e Personalizzazione</h2>
+                <p class="section-subtitle">La tua esperienza con funzionalità avanzate</p>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q14</span>
+                        Hai mai utilizzato "Claude Projects" o "ChatGPT Projects"? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q14_1" name="q14" value="Sì regolarmente" required>
+                            <label for="q14_1">Sì, li uso regolarmente e ne comprendo il valore</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q14_2" name="q14" value="Provati">
+                            <label for="q14_2">Li ho provati ma non ho capito bene il vantaggio</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q14_3" name="q14" value="So esistono">
+                            <label for="q14_3">So che esistono ma non li ho mai usati</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q14_4" name="q14" value="Non so">
+                            <label for="q14_4">Non so cosa siano</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q15</span>
+                        Hai mai configurato "Custom Instructions" (ChatGPT) o equivalenti? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q15_1" name="q15" value="Sì attive" required>
+                            <label for="q15_1">Sì, ho istruzioni personalizzate attive</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q15_2" name="q15" value="Provate">
+                            <label for="q15_2">Le ho provate ma poi disattivate</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q15_3" name="q15" value="So esistono">
+                            <label for="q15_3">So che esistono ma non le ho mai configurate</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q15_4" name="q15" value="Non so">
+                            <label for="q15_4">Non so cosa siano</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q16</span>
+                        Hai mai creato un GPT personalizzato (ChatGPT) o un Gem (Gemini)? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q16_1" name="q16" value="Sì diversi" required>
+                            <label for="q16_1">Sì, ne ho creati diversi per scopi specifici</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q16_2" name="q16" value="Uno per prova">
+                            <label for="q16_2">Ne ho creato uno per provare</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q16_3" name="q16" value="So si può">
+                            <label for="q16_3">So che si può fare ma non l'ho mai fatto</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q16_4" name="q16" value="Non so">
+                            <label for="q16_4">Non so cosa siano</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q17</span>
+                        Quando utilizzi l'AI per analizzare documenti (es. bandi, contratti), come procedi? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q17_1" name="q17" value="Copia-incolla" required>
+                            <label for="q17_1">Copio-incollo il testo nel chat e faccio domande generiche</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q17_2" name="q17" value="Carico file">
+                            <label for="q17_2">Carico il file PDF/DOCX e faccio domande strutturate</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q17_3" name="q17" value="Strumenti specifici">
+                            <label for="q17_3">Uso strumenti specifici come NotebookLM o ChatPDF</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q17_4" name="q17" value="Mai fatto">
+                            <label for="q17_4">Non ho mai analizzato documenti con AI</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q18</span>
+                        Conosci la differenza tra "search" e "deep research" con AI? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q18_1" name="q18" value="Sì" required>
+                            <label for="q18_1">Sì, e so quando usare uno o l'altro</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q18_2" name="q18" value="Sentito parlare">
+                            <label for="q18_2">Ne ho sentito parlare ma non la conosco bene</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q18_3" name="q18" value="No">
+                            <label for="q18_3">No, non la conosco</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q18_4" name="q18" value="Stessa cosa">
+                            <label for="q18_4">Sono la stessa cosa</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 5: SICUREZZA -->
+            <div class="section" id="section5">
+                <h2 class="section-title">🔐 Sicurezza e Automazione</h2>
+                <p class="section-subtitle">Best practice e conoscenze avanzate</p>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q19</span>
+                        Quali dati NON dovresti mai inserire in ChatGPT o strumenti AI pubblici? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q19_1" name="q19" value="Dati sensibili" required>
+                            <label for="q19_1">Dati personali di clienti, informazioni confidenziali, dati sensibili aziendali</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q19_2" name="q19" value="Qualsiasi">
+                            <label for="q19_2">Qualsiasi informazione, perché l'AI non è sicura</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q19_3" name="q19" value="Tutto sicuro">
+                            <label for="q19_3">Si può inserire tutto, tanto l'AI è sicura</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q19_4" name="q19" value="Solo password">
+                            <label for="q19_4">Solo le password</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q19_5" name="q19" value="Mai posto problema">
+                            <label for="q19_5">Non mi sono mai posto/a il problema</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q20</span>
+                        La tua azienda ha policy chiare sull'uso dell'AI? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q20_1" name="q20" value="Sì conosco" required>
+                            <label for="q20_1">Sì, e le conosco bene</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q20_2" name="q20" value="Esistono">
+                            <label for="q20_2">Esistono ma non le conosco nei dettagli</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q20_3" name="q20" value="Non credo">
+                            <label for="q20_3">Non credo esistano</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q20_4" name="q20" value="Non so">
+                            <label for="q20_4">Non lo so</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q21</span>
+                        Cosa sono gli "agenti AI"? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q21_1" name="q21" value="Sistemi autonomi" required>
+                            <label for="q21_1">Sistemi AI che possono eseguire task in autonomia e prendere decisioni</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q21_2" name="q21" value="Persone">
+                            <label for="q21_2">Le persone che vendono servizi AI</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q21_3" name="q21" value="Modelli avanzati">
+                            <label for="q21_3">I modelli AI più avanzati</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q21_4" name="q21" value="Non so">
+                            <label for="q21_4">Non lo so</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q22</span>
+                        Hai mai sentito parlare di N8N o strumenti di workflow automation con AI? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q22_1" name="q22" value="Sì utilizzati" required>
+                            <label for="q22_1">Sì, e li ho utilizzati</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q22_2" name="q22" value="Sì mai usati">
+                            <label for="q22_2">Sì, so cosa sono ma non li ho mai usati</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q22_3" name="q22" value="Vagamente">
+                            <label for="q22_3">Ne ho sentito parlare vagamente</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q22_4" name="q22" value="No">
+                            <label for="q22_4">No, mai sentiti</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE 6: ASPETTATIVE -->
+            <div class="section" id="section6">
+                <h2 class="section-title">🎯 Aspettative e Bisogni</h2>
+                <p class="section-subtitle">Aiutaci a personalizzare la formazione</p>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q23</span>
+                        Qual è la tua principale sfida quotidiana che vorresti risolvere con l'AI? <span class="required">*</span>
+                    </label>
+                    <textarea name="q23" rows="4" placeholder="Descrivi la tua sfida principale..." required></textarea>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q24</span>
+                        Su una scala da 1 a 5, quanto ti senti sicuro/a nell'usare l'AI per il tuo lavoro? <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="q24_1" name="q24" value="1" required>
+                            <label for="q24_1">1 - Per niente sicuro/a</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q24_2" name="q24" value="2">
+                            <label for="q24_2">2 - Poco sicuro/a</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q24_3" name="q24" value="3">
+                            <label for="q24_3">3 - Abbastanza sicuro/a</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q24_4" name="q24" value="4">
+                            <label for="q24_4">4 - Sicuro/a</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="q24_5" name="q24" value="5">
+                            <label for="q24_5">5 - Molto sicuro/a, sono autonomo/a</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <label class="question-label">
+                        <span class="question-number">Q25</span>
+                        C'è un caso d'uso specifico del tuo ruolo in Virvelle che vorresti esplorare durante la formazione?
+                    </label>
+                    <textarea name="q25" rows="4" placeholder="Descrivi un caso d'uso specifico (opzionale)..."></textarea>
+                </div>
+
+                <!-- Privacy Disclaimer -->
+                <div style="background: #FFF3CD; border-left: 4px solid #FFC107; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+                    <h3 style="color: #856404; font-size: 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.25rem;">🔒</span>
+                        Informativa Privacy
+                    </h3>
+                    <p style="color: #856404; font-size: 0.9rem; line-height: 1.6; margin: 0;">
+                        I dati forniti in questa survey saranno utilizzati <strong>esclusivamente</strong> per la preparazione 
+                        e personalizzazione del programma formativo AI Toolkit presso Virvelle S.r.l. 
+                        Nessun dato personale verrà salvato, archiviato permanentemente o condiviso con terze parti. 
+                        Le informazioni saranno conservate solo per il tempo strettamente necessario all'erogazione 
+                        della formazione e successivamente eliminate.
+                    </p>
+                    <div style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="privacyConsent" required style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary);">
+                        <label for="privacyConsent" style="cursor: pointer; font-size: 0.9rem; color: #856404;">
+                            <strong>Ho letto e accetto l'informativa privacy</strong> <span class="required">*</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOADING -->
+            <div class="loading" id="loadingScreen">
+                <div class="spinner"></div>
+                <p>Invio in corso...</p>
+            </div>
+
+            <!-- SUCCESS MESSAGE -->
+            <div class="section" id="successSection">
+                <div class="success-message">
+                    <div class="success-icon"></div>
+                    <h2 style="color: var(--dark); margin-bottom: 1rem;">Grazie per aver completato la survey!</h2>
+                    <p style="color: var(--gray); font-size: 1.1rem; margin-bottom: 1rem;">
+                        Le tue risposte sono state inviate con successo a <strong>roberto.micarelli@gmail.com</strong>
+                    </p>
+                    <p style="color: var(--gray); font-size: 1rem; margin-bottom: 2rem;">
+                        Riceverai una conferma via email e ti aspettiamo alla formazione AI Toolkit!
+                    </p>
+                    <p style="color: var(--gray); font-size: 0.85rem; font-style: italic;">
+                        🔒 I tuoi dati saranno utilizzati solo per personalizzare il programma formativo e saranno eliminati al termine del corso.
+                    </p>
+                </div>
+            </div>
+
+            <!-- NAVIGATION BUTTONS -->
+            <div class="button-group" id="navigationButtons">
+                <button type="button" class="btn-secondary" id="prevBtn" onclick="changeSection(-1)" disabled>
+                    ← Indietro
+                </button>
+                <button type="button" class="btn-primary" id="nextBtn" onclick="changeSection(1)">
+                    Avanti →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSection = 1;
+        const totalSections = 6;
+
+        function updateProgress() {
+            const progress = (currentSection / totalSections) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Sezione ${currentSection} di ${totalSections}`;
+        }
+
+        function validateSection(sectionNum) {
+            const section = document.getElementById(`section${sectionNum}`);
+            
+            // Special validation for section 1 (personal info)
+            if (sectionNum === 1) {
+                const nome = document.getElementById('nome').value.trim();
+                const cognome = document.getElementById('cognome').value.trim();
+                const email = document.getElementById('email').value.trim();
+                
+                if (!nome) {
+                    alert('Per favore, inserisci il tuo nome.');
+                    document.getElementById('nome').focus();
+                    return false;
+                }
+                if (!cognome) {
+                    alert('Per favore, inserisci il tuo cognome.');
+                    document.getElementById('cognome').focus();
+                    return false;
+                }
+                if (!email) {
+                    alert('Per favore, inserisci la tua email.');
+                    document.getElementById('email').focus();
+                    return false;
+                }
+                // Basic email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Per favore, inserisci un indirizzo email valido.');
+                    document.getElementById('email').focus();
+                    return false;
+                }
+            }
+            
+            // Special validation for section 6 (privacy consent)
+            if (sectionNum === 6) {
+                const privacyConsent = document.getElementById('privacyConsent');
+                if (!privacyConsent.checked) {
+                    alert('Devi accettare l\'informativa privacy per procedere con l\'invio.');
+                    privacyConsent.focus();
+                    return false;
+                }
+            }
+            
+            const requiredInputs = section.querySelectorAll('[required]');
+            
+            for (let input of requiredInputs) {
+                if (input.type === 'radio') {
+                    const radioName = input.name;
+                    const radioGroup = section.querySelectorAll(`input[name="${radioName}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!isChecked) {
+                        alert('Per favore, rispondi a tutte le domande obbligatorie prima di continuare.');
+                        return false;
+                    }
+                } else if (input.type === 'checkbox' && input.id !== 'privacyConsent') {
+                    const checkboxName = input.name;
+                    const checkboxGroup = section.querySelectorAll(`input[name="${checkboxName}"]`);
+                    const isChecked = Array.from(checkboxGroup).some(cb => cb.checked);
+                    if (!isChecked) {
+                        alert('Per favore, seleziona almeno un\'opzione prima di continuare.');
+                        return false;
+                    }
+                } else if (input.tagName === 'TEXTAREA' && input.hasAttribute('required')) {
+                    if (input.value.trim() === '') {
+                        alert('Per favore, rispondi a tutte le domande obbligatorie prima di continuare.');
+                        input.focus();
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function changeSection(direction) {
+            if (direction === 1 && !validateSection(currentSection)) {
+                return;
+            }
+
+            if (direction === 1 && currentSection === totalSections) {
+                submitForm();
+                return;
+            }
+
+            const sections = document.querySelectorAll('.section');
+            sections[currentSection - 1].classList.remove('active');
+
+            currentSection += direction;
+
+            sections[currentSection - 1].classList.add('active');
+
+            document.getElementById('prevBtn').disabled = currentSection === 1;
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentSection === totalSections) {
+                nextBtn.innerHTML = 'Invia Survey ✓';
+            } else {
+                nextBtn.innerHTML = 'Avanti →';
+            }
+
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function collectFormData() {
+            const formData = {};
+            
+            // Collect personal info
+            formData['nome'] = document.getElementById('nome').value;
+            formData['cognome'] = document.getElementById('cognome').value;
+            formData['email'] = document.getElementById('email').value;
+            
+            // Collect all radio inputs
+            const radioInputs = document.querySelectorAll('input[type="radio"]:checked');
+            radioInputs.forEach(input => {
+                formData[input.name] = input.value;
+            });
+
+            // Collect all checkbox inputs
+            const checkboxGroups = {};
+            const checkboxInputs = document.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxInputs.forEach(input => {
+                if (input.id === 'privacyConsent') return; // Skip privacy checkbox
+                if (!checkboxGroups[input.name]) {
+                    checkboxGroups[input.name] = [];
+                }
+                checkboxGroups[input.name].push(input.value);
+            });
+            Object.keys(checkboxGroups).forEach(key => {
+                formData[key] = checkboxGroups[key].join(', ');
+            });
+
+            // Collect all textarea inputs
+            const textareaInputs = document.querySelectorAll('textarea');
+            textareaInputs.forEach(input => {
+                formData[input.name] = input.value;
+            });
+
+            return formData;
+        }
+
+        function formatDataForEmail(data) {
+            let emailBody = "NUOVA RISPOSTA SURVEY AI TOOLKIT - VIRVELLE\n";
+            emailBody += "=".repeat(50) + "\n\n";
+            
+            // Personal Info Section
+            emailBody += "DATI PARTECIPANTE:\n";
+            emailBody += "-".repeat(50) + "\n";
+            emailBody += `Nome: ${data.nome}\n`;
+            emailBody += `Cognome: ${data.cognome}\n`;
+            emailBody += `Email: ${data.email}\n\n`;
+            
+            const questionLabels = {
+                'q1': 'Ruolo in Virvelle',
+                'q2': 'Frequenza utilizzo AI',
+                'q3': 'Strumenti AI utilizzati',
+                'q4': 'Obiettivo formazione',
+                'q5': 'Conoscenza "token"',
+                'q6': 'Conoscenza "context window"',
+                'q7': 'Affermazione corretta',
+                'q8': 'Perché AI "allucina"',
+                'q9': 'Qualità prompt attuali',
+                'q10': 'Prompt più efficace',
+                'q11': 'Few-shot learning',
+                'q12': 'Chain-of-thought',
+                'q13': 'Iterazione prompt',
+                'q14': 'Projects (Claude/ChatGPT)',
+                'q15': 'Custom Instructions',
+                'q16': 'GPT/Gem personalizzati',
+                'q17': 'Analisi documenti',
+                'q18': 'Search vs Deep Research',
+                'q19': 'Dati da non inserire',
+                'q20': 'Policy aziendali AI',
+                'q21': 'Agenti AI',
+                'q22': 'N8N/Workflow automation',
+                'q23': 'Sfida quotidiana',
+                'q24': 'Sicurezza uso AI (1-5)',
+                'q25': 'Caso d\'uso specifico'
+            };
+
+            emailBody += "RISPOSTE SURVEY:\n";
+            emailBody += "-".repeat(50) + "\n";
+            Object.keys(data).forEach(key => {
+                if (key !== 'nome' && key !== 'cognome' && key !== 'email') {
+                    const label = questionLabels[key] || key;
+                    emailBody += `${label}:\n${data[key] || 'Non risposto'}\n\n`;
+                }
+            });
+
+            emailBody += "=".repeat(50) + "\n";
+            emailBody += `Data compilazione: ${new Date().toLocaleString('it-IT')}\n\n`;
+            
+            // CSV Section for Excel Import
+            emailBody += "\n" + "=".repeat(50) + "\n";
+            emailBody += "FORMATO CSV (Copia e incolla in Excel):\n";
+            emailBody += "=".repeat(50) + "\n";
+            emailBody += generateCSV(data);
+
+            return emailBody;
+        }
+
+        function generateCSV(data) {
+            const timestamp = new Date().toLocaleString('it-IT');
+            
+            // CSV Headers
+            const headers = [
+                "Timestamp", "Nome", "Cognome", "Email",
+                "Q1-Ruolo", "Q2-Frequenza", "Q3-Strumenti", "Q4-Obiettivo",
+                "Q5-Token", "Q6-Context", "Q7-Corretta", "Q8-Allucinazioni",
+                "Q9-QualitàPrompt", "Q10-PromptEfficace", "Q11-FewShot", "Q12-ChainThought",
+                "Q13-Iterazione", "Q14-Projects", "Q15-CustomInstr", "Q16-GPT-Gem",
+                "Q17-AnalisiDoc", "Q18-SearchDeep", "Q19-Sicurezza", "Q20-Policy",
+                "Q21-Agenti", "Q22-N8N", "Q23-Sfida", "Q24-Sicurezza1-5", "Q25-CasoUso"
+            ];
+            
+            // CSV Values - escape quotes and commas
+            const escapeCSV = (str) => {
+                if (!str) return '""';
+                str = String(str);
+                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                    return '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            };
+            
+            const values = [
+                timestamp,
+                escapeCSV(data.nome),
+                escapeCSV(data.cognome),
+                escapeCSV(data.email),
+                escapeCSV(data.q1),
+                escapeCSV(data.q2),
+                escapeCSV(data.q3),
+                escapeCSV(data.q4),
+                escapeCSV(data.q5),
+                escapeCSV(data.q6),
+                escapeCSV(data.q7),
+                escapeCSV(data.q8),
+                escapeCSV(data.q9),
+                escapeCSV(data.q10),
+                escapeCSV(data.q11),
+                escapeCSV(data.q12),
+                escapeCSV(data.q13),
+                escapeCSV(data.q14),
+                escapeCSV(data.q15),
+                escapeCSV(data.q16),
+                escapeCSV(data.q17),
+                escapeCSV(data.q18),
+                escapeCSV(data.q19),
+                escapeCSV(data.q20),
+                escapeCSV(data.q21),
+                escapeCSV(data.q22),
+                escapeCSV(data.q23),
+                escapeCSV(data.q24),
+                escapeCSV(data.q25)
+            ];
+            
+            return headers.join(',') + '\n' + values.join(',');
+        }
+
+        async function submitForm() {
+            const formData = collectFormData();
+            
+            // Hide navigation, show loading
+            document.getElementById('navigationButtons').style.display = 'none';
+            document.getElementById('loadingScreen').classList.add('show');
+
+            try {
+                // Prepare email data
+                const emailData = formatDataForEmail(formData);
+                
+                // IMPORTANTE: Email configurata
+                const YOUR_EMAIL = 'roberto.micarelli@gmail.com';
+                
+                // Using FormSubmit.co for easy form submission (no registration needed)
+                const response = await fetch('https://formsubmit.co/ajax/' + YOUR_EMAIL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: `Survey AI Toolkit - ${formData.nome} ${formData.cognome}`,
+                        email: formData.email,
+                        message: emailData,
+                        _subject: `Survey AI Toolkit - ${formData.nome} ${formData.cognome}`,
+                        _template: 'table',
+                        _captcha: 'false'
+                    })
+                });
+
+                if (response.ok) {
+                    // Success - show success message
+                    document.getElementById('loadingScreen').classList.remove('show');
+                    const sections = document.querySelectorAll('.section');
+                    sections.forEach(s => s.classList.remove('active'));
+                    document.getElementById('successSection').classList.add('active');
+                    document.querySelector('.progress-container').style.display = 'none';
+                } else {
+                    throw new Error('Errore nell\'invio');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingScreen').classList.remove('show');
+                document.getElementById('navigationButtons').style.display = 'flex';
+                alert('Si è verificato un errore nell\'invio della survey. Per favore riprova o contatta l\'amministratore.');
+            }
+        }
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html>
